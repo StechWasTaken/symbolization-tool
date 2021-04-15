@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang='en'>
+    <head>
+        <meta charset='utf-8'>
+        <title>symbolizer</title>
+    </head>
+    <body>
+        <form method="POST" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            {{ form.video() }}
+            {{ form.submit() }}
+        </form>
+        <div id='frames'></div>
+        <script>
+            function symbolize(pixel) {
+                pixel = pixel / 255
+                if (pixel >= 0.93)  {return '@'}
+                if (pixel >= 0.85)  {return '$'}
+                if (pixel >= 0.6)   {return '#'}
+                if (pixel >= 0.5)   {return '/'}
+                if (pixel >= 0.35)  {return '>'}
+                if (pixel >= 0.28)  {return '*'}
+                if (pixel >= 0.16)  {return '+'}
+                if (pixel >= 0.12)  {return '-'}
+                if (pixel >= 0.07)  {return '.'}
+                return ' ';
+            }
+
+            var frames = JSON.parse('{{ frames | tojson | safe }}');
+            for (var frame in frames) {
+                if (frames.hasOwnProperty(frame)) {
+                    var pixels = JSON.parse(frames[frame]);
+                    var symbols = [];
+                    for (var pixel in pixels) {
+                        symbol = symbolize(pixel);
+                        symbols.push(symbol);
+                    }
+                    console.log(symbols);
+                }
+            }
+        </script>
+    </body>
+</html>
