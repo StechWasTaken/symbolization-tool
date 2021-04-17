@@ -21,9 +21,6 @@
                 if (pixel >= 0.85)  {return '$'}
                 if (pixel >= 0.6)   {return '#'}
                 if (pixel >= 0.4)   {return '/'}
-                // if (pixel >= 0.35)  {return '>'}
-                // if (pixel >= 0.28)  {return '*'}
-                // if (pixel >= 0.16)  {return '+'}
                 if (pixel >= 0.2)  {return '_'}
                 if (pixel >= 0.07)  {return '.'}
                 return ' ';
@@ -93,35 +90,6 @@
                 }
                 window.requestAnimationFrame(draw);
             }
-
-            // var last_frame_time = 0
-            // function draw(time) {
-            //     if (time-last_frame_time < frame_time) {
-            //         window.requestAnimationFrame(draw);
-            //         return
-            //     }
-            //     context.clearRect(0, 0, canvas.width, canvas.height);
-            //     context.fillStyle = 'white';
-            //     last_frame_time = time;
-            //     var pixels = JSON.parse(frames[index[i]]);
-            //     var row = 0;
-            //     var col = 0;
-            //     for (var pixel in pixels) {
-            //         p = pixels[pixel];
-            //         if (p / 255 >= 0.07) { context.fillText(symbolize(p), col*12, row*12+12) }
-            //         col++;
-            //         if (col == width) {
-            //             col = 0;
-            //             row++;
-            //         }
-            //     }
-            //     i++;
-            //     if (frames[index[i]] == null) {
-            //         i = 0;
-            //     }
-            //     window.requestAnimationFrame(draw);
-            //     return
-            // }
         </script>
         {% endif %}
     </body>
