@@ -3,6 +3,8 @@
     <head>
         <meta charset='utf-8'>
         <title>symbolizer</title>
+        <link rel="preconnect" href="https://fonts.gstatic.com">
+        <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
     </head>
     <body>
         <form method="POST" enctype="multipart/form-data">
@@ -10,34 +12,117 @@
             {{ form.video() }}
             {{ form.submit() }}
         </form>
-        <div id='frames'></div>
+        {% if frames != {} %}
+        <canvas id="myCanvas" width="{{ size[0] * 12 }}" height="{{ size[1] * 12 }}" style="border:1px solid #000000; background: rgb(9, 9, 9);"></canvas>
         <script>
             function symbolize(pixel) {
                 pixel = pixel / 255
                 if (pixel >= 0.93)  {return '@'}
                 if (pixel >= 0.85)  {return '$'}
                 if (pixel >= 0.6)   {return '#'}
-                if (pixel >= 0.5)   {return '/'}
-                if (pixel >= 0.35)  {return '>'}
-                if (pixel >= 0.28)  {return '*'}
-                if (pixel >= 0.16)  {return '+'}
-                if (pixel >= 0.12)  {return '-'}
+                if (pixel >= 0.4)   {return '/'}
+                // if (pixel >= 0.35)  {return '>'}
+                // if (pixel >= 0.28)  {return '*'}
+                // if (pixel >= 0.16)  {return '+'}
+                if (pixel >= 0.2)  {return '_'}
                 if (pixel >= 0.07)  {return '.'}
                 return ' ';
             }
 
+            const width = parseInt('{{ size[0] }}');
+            const height = parseInt('{{ size[1] }}');
+            console.log(width, height);
+            const total_frames = parseInt('{{ total_frames }}');
+            const frame_time = parseFloat('{{ frame_time }}');
             var frames = JSON.parse('{{ frames | tojson | safe }}');
-            for (var frame in frames) {
-                if (frames.hasOwnProperty(frame)) {
-                    var pixels = JSON.parse(frames[frame]);
-                    var symbols = [];
-                    for (var pixel in pixels) {
-                        symbol = symbolize(pixel);
-                        symbols.push(symbol);
-                    }
-                    console.log(symbols);
+            var index = [];
+            var canvases;
+            var i = 0;
+            var last_frame_time = 0;
+            var canvas = document.getElementById('myCanvas');
+            var context = canvas.getContext('2d');
+            context.font = '12px Source Code Pro';
+
+            window.onload = function play() {
+                canvases = create_frames(frames, width*12, height*12);
+                for (var frame_index in canvases) {
+                    index.push(frame_index);
                 }
+                window.requestAnimationFrame(draw);
             }
+
+            function create_frames(frames, width, height) {
+                let canvases = [];
+                for (let frame in frames) {
+                    pixels = JSON.parse(frames[frame]);
+                    let canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    let context = canvas.getContext('2d');
+                    context.fillStyle = 'black';
+                    context.fillRect(0, 0, canvas.width, canvas.height);
+                    context.fillStyle = 'white';
+                    let col = 0;
+                    let row = 0;
+                    for (let pixel in pixels) {
+                        context.fillText(symbolize(pixels[pixel]), col*12, row*12+12)
+                        col++;
+                        if (col == width / 12) {
+                            col = 0;
+                            row++;
+                        }
+                    }
+                    let img = new Image;
+                    img.src = canvas.toDataURL()
+                    canvases.push(img);
+                }
+                return canvases;
+            }
+
+            function draw(time) {
+                if (time-last_frame_time < frame_time) {
+                    window.requestAnimationFrame(draw);
+                    return
+                }
+                last_frame_time = time;
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                context.drawImage(canvases[index[i]], 0, 0);
+                i++;
+                if (canvases[index[i]] == null) {
+                    i = 0;
+                }
+                window.requestAnimationFrame(draw);
+            }
+
+            // var last_frame_time = 0
+            // function draw(time) {
+            //     if (time-last_frame_time < frame_time) {
+            //         window.requestAnimationFrame(draw);
+            //         return
+            //     }
+            //     context.clearRect(0, 0, canvas.width, canvas.height);
+            //     context.fillStyle = 'white';
+            //     last_frame_time = time;
+            //     var pixels = JSON.parse(frames[index[i]]);
+            //     var row = 0;
+            //     var col = 0;
+            //     for (var pixel in pixels) {
+            //         p = pixels[pixel];
+            //         if (p / 255 >= 0.07) { context.fillText(symbolize(p), col*12, row*12+12) }
+            //         col++;
+            //         if (col == width) {
+            //             col = 0;
+            //             row++;
+            //         }
+            //     }
+            //     i++;
+            //     if (frames[index[i]] == null) {
+            //         i = 0;
+            //     }
+            //     window.requestAnimationFrame(draw);
+            //     return
+            // }
         </script>
+        {% endif %}
     </body>
 </html>
